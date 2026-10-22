@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
 )
 
 type Operator string
@@ -15,12 +17,11 @@ const (
 )
 
 func main() {
-	result, err := calculate(10, OpDivide, 4)
-	if err != nil {
-		fmt.Println("Error: ", err)
-	} else {
-		fmt.Println(result)
-	}
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Print("Enter the first number: ")
+	scanner.Scan()
+	answer := scanner.Text()
+	fmt.Printf("You typed: %q (%T)\n", answer, answer)
 }
 
 func add(a, b float64) float64 {

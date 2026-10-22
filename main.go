@@ -4,7 +4,10 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"math"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type Operator string
@@ -21,7 +24,12 @@ func main() {
 	fmt.Print("Enter the first number: ")
 	scanner.Scan()
 	answer := scanner.Text()
-	fmt.Printf("You typed: %q (%T)\n", answer, answer)
+	first, err := parseNumber(answer)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return
+	}
+	fmt.Printf("%g (%T)\n", first, first)
 }
 
 func add(a, b float64) float64 {
@@ -56,4 +64,18 @@ func calculate(a float64, op Operator, b float64) (float64, error) {
 	default:
 		return 0, fmt.Errorf("unknown operator %q", op)
 	}
+}
+
+func parseNumber(text string) (float64, error) {
+	trimmed := strings.TrimSpace(text)
+	if trimmed == "" {
+		return 0, errors.New("please enter a number")
+	}
+
+	value, err := strconv.ParseFloat(trimmed, 64)
+	if err != nil || math.IsNaN(value) || math.IsInf(value, 0) {
+		return 0, fmt.Errorf("%q is not a valid number", trimmed)
+	}
+
+	return value, nil
 }

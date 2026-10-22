@@ -38,7 +38,21 @@ func main() {
 		}
 		return
 	}
-	fmt.Printf("%g %s\n", first, op)
+	second, err := askNumber(scanner, "Enter the second number: ")
+	if err != nil {
+		fmt.Println()
+		if !errors.Is(err, io.EOF) {
+			fmt.Println("Error:", err)
+		}
+		return
+	}
+
+	result, err := calculate(first, op, second)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Printf("%g %s %g = %g\n", first, op, second, result)
+	}
 }
 
 func add(a, b float64) float64 {

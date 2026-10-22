@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"strconv"
@@ -21,12 +22,12 @@ const (
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Print("Enter the first number: ")
-	scanner.Scan()
-	answer := scanner.Text()
-	first, err := parseNumber(answer)
+	first, err := askNumber(scanner, "Enter the first number: ")
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println()
+		if !errors.Is(err, io.EOF) {
+			fmt.Println("Error:", err)
+		}
 		return
 	}
 	fmt.Printf("%g (%T)\n", first, first)
@@ -78,4 +79,23 @@ func parseNumber(text string) (float64, error) {
 	}
 
 	return value, nil
+}
+
+func askNumber(scanner *bufio.Scanner, prompt string) (float64, error) {
+	for {
+		fmt.Print(prompt)
+		if !scanner.Scan() {
+			if err := scanner.Err(); err != nil {
+				return 0, err
+			}
+			return 0, io.EOF
+		}
+
+		value, err := parseNumber(scanner.Text())
+		if err != nil {
+			fmt.Printf("%v. Try again.\n", err)
+			continue
+		}
+		return value, nil
+	}
 }

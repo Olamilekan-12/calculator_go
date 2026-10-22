@@ -9,15 +9,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
-)
 
-type Operator string
-
-const (
-	OpAdd      Operator = "+"
-	OpSubtract Operator = "-"
-	OpMultiply Operator = "*"
-	OpDivide   Operator = "/"
+	"calculator/operations"
 )
 
 func main() {
@@ -29,40 +22,6 @@ func main() {
 			fmt.Println("Error:", err)
 			os.Exit(1)
 		}
-	}
-}
-
-func add(a, b float64) float64 {
-	return a + b
-}
-
-func subtract(a, b float64) float64 {
-	return a - b
-}
-
-func multiply(a, b float64) float64 {
-	return a * b
-}
-
-func divide(a, b float64) (float64, error) {
-	if b == 0 {
-		return 0, errors.New("cannot divide by zero")
-	}
-	return a / b, nil
-}
-
-func calculate(a float64, op Operator, b float64) (float64, error) {
-	switch op {
-	case OpAdd:
-		return add(a, b), nil
-	case OpSubtract:
-		return subtract(a, b), nil
-	case OpMultiply:
-		return multiply(a, b), nil
-	case OpDivide:
-		return divide(a, b)
-	default:
-		return 0, fmt.Errorf("unknown operator %q", op)
 	}
 }
 
@@ -78,15 +37,6 @@ func parseNumber(text string) (float64, error) {
 	}
 
 	return value, nil
-}
-
-func parseOperator(text string) (Operator, bool) {
-	op := Operator(strings.TrimSpace(text))
-	switch op {
-	case OpAdd, OpSubtract, OpMultiply, OpDivide:
-		return op, true
-	}
-	return "", false
 }
 
 func askNumber(scanner *bufio.Scanner, prompt string) (float64, error) {
@@ -108,7 +58,7 @@ func askNumber(scanner *bufio.Scanner, prompt string) (float64, error) {
 	}
 }
 
-func askOperator(scanner *bufio.Scanner, prompt string) (Operator, error) {
+func askOperator(scanner *bufio.Scanner, prompt string) (operations.Operator, error) {
 	for {
 		fmt.Print(prompt)
 		if !scanner.Scan() {
@@ -118,7 +68,7 @@ func askOperator(scanner *bufio.Scanner, prompt string) (Operator, error) {
 			return "", io.EOF
 		}
 
-		op, ok := parseOperator(scanner.Text())
+		op, ok := operations.ParseOperator(scanner.Text())
 		if !ok {
 			fmt.Printf("%q is not an operator. Use + - * or /. Try again. \n", strings.TrimSpace(scanner.Text()))
 			continue
@@ -143,7 +93,7 @@ func runCalculation(scanner *bufio.Scanner) error {
 		return err
 	}
 
-	result, err := calculate(first, op, second)
+	result, err := operations.Calculate(first, op, second)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil

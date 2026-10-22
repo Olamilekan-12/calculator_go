@@ -39,6 +39,11 @@ func parseNumber(text string) (float64, error) {
 	return value, nil
 }
 
+func formatResult(value float64) string {
+	rounded, _ := strconv.ParseFloat(strconv.FormatFloat(value, 'g', 12, 64), 64)
+	return strconv.FormatFloat(rounded, 'f', -1, 64)
+}
+
 func askNumber(scanner *bufio.Scanner, prompt string) (float64, error) {
 	for {
 		fmt.Print(prompt)
@@ -98,7 +103,7 @@ func runCalculation(scanner *bufio.Scanner) error {
 		fmt.Println("Error:", err)
 		return nil
 	}
-	fmt.Printf("%g %s %g = %g\n", first, op, second, result)
+	fmt.Printf("%g %s %g = %g\n", first, op, second, formatResult(result))
 	return nil
 }
 

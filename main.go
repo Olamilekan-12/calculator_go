@@ -30,7 +30,15 @@ func main() {
 		}
 		return
 	}
-	fmt.Printf("%g (%T)\n", first, first)
+	op, err := askOperator(scanner, "Enter an operator (+, -, *, /): ")
+	if err != nil {
+		fmt.Println()
+		if !errors.Is(err, io.EOF) {
+			fmt.Println("Error:", err)
+		}
+		return
+	}
+	fmt.Printf("%g %s\n", first, op)
 }
 
 func add(a, b float64) float64 {
@@ -81,6 +89,15 @@ func parseNumber(text string) (float64, error) {
 	return value, nil
 }
 
+func parseOperator(text string) (Operator, bool) {
+	op := Operator(strings.TrimSpace(text))
+	switch op {
+	case OpAdd, OpSubtract, OpMultiply, OpDivide:
+		return op, true
+	}
+	return "", false
+}
+
 func askNumber(scanner *bufio.Scanner, prompt string) (float64, error) {
 	for {
 		fmt.Print(prompt)
@@ -97,5 +114,24 @@ func askNumber(scanner *bufio.Scanner, prompt string) (float64, error) {
 			continue
 		}
 		return value, nil
+	}
+}
+
+func askOperator(scanner *bufio.Scanner, prompt string) (Operator, error) {
+	for {
+		fmt.Print(prompt)
+		if !scanner.Scan() {
+			if err := scanner.Err(); err != nil {
+				return "", err
+			}
+			return "", io.EOF
+		}
+
+		op, ok := parseOperator(scanner.Text())
+		if !ok {
+			fmt.Printf("%q is not an operator. Use + - * or /. Try again. \n", strings.TrimSpace(scanner.Text()))
+			continue
+		}
+		return op, nil
 	}
 }

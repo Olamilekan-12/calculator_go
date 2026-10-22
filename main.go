@@ -22,36 +22,13 @@ const (
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	first, err := askNumber(scanner, "Enter the first number: ")
-	if err != nil {
-		fmt.Println()
-		if !errors.Is(err, io.EOF) {
-			fmt.Println("Error:", err)
-		}
-		return
-	}
-	op, err := askOperator(scanner, "Enter an operator (+, -, *, /): ")
-	if err != nil {
-		fmt.Println()
-		if !errors.Is(err, io.EOF) {
-			fmt.Println("Error:", err)
-		}
-		return
-	}
-	second, err := askNumber(scanner, "Enter the second number: ")
-	if err != nil {
-		fmt.Println()
-		if !errors.Is(err, io.EOF) {
-			fmt.Println("Error:", err)
-		}
-		return
-	}
 
-	result, err := calculate(first, op, second)
-	if err != nil {
-		fmt.Println("Error:", err)
-	} else {
-		fmt.Printf("%g %s %g = %g\n", first, op, second, result)
+	if err := run(scanner); err != nil {
+		fmt.Println()
+		if !errors.Is(err, io.EOF) {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
 	}
 }
 
@@ -147,5 +124,58 @@ func askOperator(scanner *bufio.Scanner, prompt string) (Operator, error) {
 			continue
 		}
 		return op, nil
+	}
+}
+
+func runCalculation(scanner *bufio.Scanner) error {
+	first, err := askNumber(scanner, "Enter the first number: ")
+	if err != nil {
+		return err
+	}
+
+	op, err := askOperator(scanner, "Enter an operator (+, -, *, /): ")
+	if err != nil {
+		return err
+	}
+
+	second, err := askNumber(scanner, "Enter the second number: ")
+	if err != nil {
+		return err
+	}
+
+	result, err := calculate(first, op, second)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil
+	}
+	fmt.Printf("%g %s %g = %g\n", first, op, second, result)
+	return nil
+}
+
+func askAgain(scanner *bufio.Scanner) (bool, error) {
+	fmt.Print("Calculate again? (y/n): ")
+	if !scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return false, err
+		}
+		return false, io.EOF
+	}
+	answer := strings.ToLower(strings.TrimSpace(scanner.Text()))
+	return answer == "y", nil
+}
+
+func run(scanner *bufio.Scanner) error {
+	for {
+		if err := runCalculation(scanner); err != nil {
+			return err
+		}
+
+		again, err := askAgain(scanner)
+		if err != nil {
+			return err
+		}
+		if !again {
+			return nil
+		}
 	}
 }
